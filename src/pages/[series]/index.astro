@@ -1,0 +1,38 @@
+---
+import Base from "../../layouts/Base.astro";
+import seriesData from "../../data/series.json";
+import pucksData from "../../data/pucks.json";
+import type { Puck, Series } from "../../lib/types";
+
+export function getStaticPaths() {
+  return (seriesData as Series[]).map((series) => ({
+    params: { series: series.slug },
+    props: {
+      series,
+      pucks: (pucksData as Puck[]).filter((puck) => puck.seriesSlug === series.slug),
+    },
+  }));
+}
+
+interface Props {
+  series: Series;
+  pucks: Puck[];
+}
+
+const { series, pucks } = Astro.props;
+---
+
+<Base title={series.name}>
+  <p><a href="/">&larr; All series</a></p>
+  <h1>{series.name}</h1>
+  {series.notes && <p>{series.notes}</p>}
+  <ul>
+    {
+      pucks.map((puck) => (
+        <li>
+          <a href={`/${series.slug}/${puck.slug}/`}>{puck.name}</a>
+        </li>
+      ))
+    }
+  </ul>
+</Base>

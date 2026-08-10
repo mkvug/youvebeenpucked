@@ -1,0 +1,18 @@
+---
+import Base from "../layouts/Base.astro";
+import series from "../data/series.json";
+---
+
+<Base title="You've Been Pucked">
+  <h1>You've Been Pucked</h1>
+  <ul>
+    {
+      series.map((s) => (
+        <li>
+          <a href={`/${s.slug}/`}>{s.name}</a>
+          {s.countInSeries != null && ` (${s.countInSeries})`}
+        </li>
+      ))
+    }
+  </ul>
+</Base>

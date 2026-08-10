@@ -1,0 +1,22 @@
+{
+  "name": "pucked",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "npm run fetch:data && astro dev",
+    "build": "npm run fetch:data && astro build",
+    "preview": "astro preview",
+    "fetch:data": "tsx scripts/fetch-data.ts",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.12"
+  }
+}
