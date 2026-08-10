@@ -23,7 +23,11 @@ function badgeStatus(status: string): BadgeStatus {
 <div class="ds-puck-grid">
     {
         pucks.map((puck) => (
-            <a class="puck-tile" href={`/${seriesSlug}/${puck.slug}/`}>
+            <a
+                class="puck-tile"
+                href={`/${seriesSlug}/${puck.slug}/`}
+                data-status={badgeStatus(puck.status)}
+            >
                 <PuckPhoto
                     imageUrl={puck.imageUrl}
                     tone={tone}
@@ -64,6 +68,9 @@ function badgeStatus(status: string): BadgeStatus {
         padding: 0;
         font-family: var(--font-body);
         text-decoration: none;
+    }
+    .puck-tile[hidden] {
+        display: none;
     }
     .puck-name {
         font-size: var(--text-caption);

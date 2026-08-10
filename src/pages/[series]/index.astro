@@ -1,8 +1,13 @@
 ---
 import Base from "../../layouts/Base.astro";
 import Container from "../../components/Container.astro";
+import Badge from "../../components/Badge.astro";
+import Tag from "../../components/Tag.astro";
+import PuckGrid from "../../components/PuckGrid.astro";
 import seriesData from "../../data/series.json";
 import pucksData from "../../data/pucks.json";
+import { toneFor } from "../../lib/tones";
+import { seriesDateLabel } from "../../lib/seriesDate";
 import type { Puck, Series } from "../../lib/types";
 
 export function getStaticPaths() {
@@ -21,21 +26,174 @@ interface Props {
 }
 
 const { series, pucks } = Astro.props;
+
+const allSeries = seriesData as Series[];
+const seriesIndex = allSeries.findIndex((s) => s.slug === series.slug);
+const isLatest = seriesIndex === 0;
+const tone = toneFor(seriesIndex);
+const dateLabel = seriesDateLabel(pucks);
+
+const FILTERS = [
+  { id: "all", label: "All" },
+  { id: "hidden", label: "Still out there" },
+  { id: "found", label: "Found" },
+  { id: "keep", label: "Kept" },
+  { id: "rehide", label: "Re-hidden" },
+];
 ---
 
 <Base title={series.name}>
-  <Container>
-    <p><a href="/">&larr; All series</a></p>
-    <h1>{series.name}</h1>
-    {series.notes && <p>{series.notes}</p>}
-    <ul>
-      {
-        pucks.map((puck) => (
-          <li>
-            <a href={`/${series.slug}/${puck.slug}/`}>{puck.name}</a>
-          </li>
-        ))
-      }
-    </ul>
-  </Container>
+  <section class="hero" data-tone={tone}>
+    <Container as="div" class="hero-inner">
+      <a class="back-link" href="/">&larr; Back to homepage</a>
+      <div class="hero-tag">
+        {isLatest && <Badge status="hidden">Latest series</Badge>}
+        {dateLabel && <span class="hero-date">{dateLabel}</span>}
+      </div>
+      <h1>{series.name}</h1>
+      {series.notes && <p class="hero-tagline">{series.notes}</p>}
+    </Container>
+  </section>
+
+  <section class="grid-section">
+    <Container>
+      <div class="grid-header">
+        <div id="puck-count" class="puck-count">
+          {pucks.length} {pucks.length === 1 ? "puck" : "pucks"}
+        </div>
+        <div class="filter-tags">
+          {
+            FILTERS.map((f) => (
+              <Tag filter={f.id} selected={f.id === "all"}>
+                {f.label}
+              </Tag>
+            ))
+          }
+        </div>
+      </div>
+
+      {pucks.length > 0 && <PuckGrid pucks={pucks} seriesSlug={series.slug} tone={tone} />}
+      <p id="empty-state" class="empty-state" hidden={pucks.length > 0}>
+        No pucks match this filter yet.
+      </p>
+    </Container>
+  </section>
 </Base>
+
+<style>
+  .hero {
+    color: var(--white);
+  }
+  .hero[data-tone="teal"] {
+    background: var(--color-brand-primary);
+  }
+  .hero[data-tone="coral"] {
+    background: var(--color-accent-coral);
+  }
+  .hero[data-tone="mustard"] {
+    background: var(--color-accent-mustard);
+    color: var(--ink-900);
+  }
+  .hero[data-tone="plum"] {
+    background: var(--color-accent-plum);
+  }
+  .hero :global(.hero-inner) {
+    padding-block: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .back-link {
+    color: inherit;
+    font-family: var(--font-body);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-body-sm);
+    margin-bottom: 12px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .back-link:hover {
+    color: inherit;
+    opacity: 0.85;
+  }
+  .hero-tag {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .hero-date {
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-bold);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-display-lg);
+    margin: 0 0 16px;
+    line-height: 1.05;
+  }
+  .hero-tagline {
+    font-size: var(--text-body-lg);
+    line-height: 1.5;
+    margin: 0;
+    max-width: 460px;
+  }
+
+  .grid-section {
+    padding-block: 40px 64px;
+  }
+  .grid-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .puck-count {
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-display-sm);
+    color: var(--color-text-primary);
+  }
+  .filter-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .empty-state {
+    color: var(--color-text-muted);
+    font-size: var(--text-body-sm);
+    padding: 40px 0;
+    text-align: center;
+  }
+</style>
+
+<script>
+  const tags = document.querySelectorAll(".filter-tags [data-filter]");
+  const tiles = document.querySelectorAll(".puck-tile");
+  const countEl = document.querySelector("#puck-count");
+  const emptyEl = document.querySelector("#empty-state");
+
+  function applyFilter(filter) {
+    let visible = 0;
+    tiles.forEach((tile) => {
+      const match = filter === "all" || tile.dataset.status === filter;
+      tile.hidden = !match;
+      if (match) visible++;
+    });
+    if (countEl) countEl.textContent = `${visible} ${visible === 1 ? "puck" : "pucks"}`;
+    if (emptyEl) emptyEl.hidden = visible !== 0;
+    tags.forEach((tag) => {
+      tag.setAttribute("aria-pressed", String(tag.dataset.filter === filter));
+    });
+  }
+
+  tags.forEach((tag) => {
+    tag.addEventListener("click", () => applyFilter(tag.dataset.filter ?? "all"));
+  });
+</script>

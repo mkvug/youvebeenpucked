@@ -1,0 +1,40 @@
+---
+interface Props {
+  /** Filter key used by the series page's client-side filter script. */
+  filter?: string;
+  selected?: boolean;
+  class?: string;
+}
+
+const { filter, selected = false, class: className } = Astro.props;
+---
+
+<button
+  type="button"
+  class:list={["ds-tag", className]}
+  data-filter={filter}
+  aria-pressed={selected}
+>
+  <slot />
+</button>
+
+<style>
+  .ds-tag {
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--color-border-default);
+    background: var(--color-bg-surface);
+    color: var(--color-text-secondary);
+    font-family: var(--font-body);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-body-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .ds-tag[aria-pressed="true"] {
+    border-color: var(--color-brand-primary);
+    background: var(--color-brand-primary-soft);
+    color: var(--color-brand-primary-press);
+  }
+</style>
