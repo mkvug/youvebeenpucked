@@ -1,8 +1,9 @@
 ---
 import "../styles/tokens.css";
+import Container from "../components/Container.astro";
 
 interface Props {
-  title: string;
+    title: string;
 }
 
 const { title } = Astro.props;
@@ -10,12 +11,49 @@ const { title } = Astro.props;
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-  </head>
-  <body>
-    <slot />
-  </body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{title}</title>
+    </head>
+    <body>
+        <header class="site-header">
+            <Container as="div" class="header-inner">
+                <div class="brand">You've Been Pucked</div>
+            </Container>
+        </header>
+        <slot />
+        <footer class="site-footer">
+            <Container as="div" class="footer-inner"
+                >© {new Date().getFullYear()} You've Been Pucked</Container
+            >
+        </footer>
+    </body>
 </html>
+
+<style>
+    .site-header {
+        border-bottom: 1px solid var(--color-border-default);
+    }
+    .site-header :global(.header-inner) {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-block: 24px;
+    }
+    .brand {
+        font-family: var(--font-display);
+        font-weight: var(--weight-bold);
+        font-size: var(--text-body-lg);
+        color: var(--color-text-primary);
+    }
+
+    .site-footer {
+        border-top: 1px solid var(--color-border-default);
+        color: var(--color-text-muted);
+        font-size: var(--text-body-sm);
+    }
+    .site-footer :global(.footer-inner) {
+        padding-block: 28px;
+    }
+</style>

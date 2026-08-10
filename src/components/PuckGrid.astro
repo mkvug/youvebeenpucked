@@ -7,59 +7,69 @@ type Tone = "teal" | "coral" | "mustard" | "plum";
 type BadgeStatus = "found" | "keep" | "rehide" | "hidden";
 
 interface Props {
-  pucks: Puck[];
-  seriesSlug: string;
-  tone: Tone;
+    pucks: Puck[];
+    seriesSlug: string;
+    tone: Tone;
 }
 
 const { pucks, seriesSlug, tone } = Astro.props;
 
 function badgeStatus(status: string): BadgeStatus {
-  if (status === "Found" || status === "Assumed Found") return "found";
-  return "hidden";
+    if (status === "Found" || status === "Assumed Found") return "found";
+    return "hidden";
 }
 ---
 
 <div class="ds-puck-grid">
-  {
-    pucks.map((puck) => (
-      <a class="puck-tile" href={`/${seriesSlug}/${puck.slug}/`}>
-        <PuckPhoto imageUrl={puck.imageUrl} tone={tone} size={88} alt={puck.name} />
-        <div class="puck-name">{puck.name}</div>
-        <Badge status={badgeStatus(puck.status)} />
-      </a>
-    ))
-  }
+    {
+        pucks.map((puck) => (
+            <a class="puck-tile" href={`/${seriesSlug}/${puck.slug}/`}>
+                <PuckPhoto
+                    imageUrl={puck.imageUrl}
+                    tone={tone}
+                    size={256}
+                    alt={puck.name}
+                />
+                <div class="puck-name">{puck.name}</div>
+                <Badge status={badgeStatus(puck.status)} />
+            </a>
+        ))
+    }
 </div>
 
 <style>
-  .ds-puck-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 48px;
-  }
-  @media (max-width: 600px) {
     .ds-puck-grid {
-      grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 48px;
     }
-  }
+    @media (min-width: 650px) {
+        .ds-puck-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    @media (min-width: 960px) {
+        .ds-puck-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
 
-  .puck-tile {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    border: none;
-    background: none;
-    padding: 0;
-    font-family: var(--font-body);
-    text-decoration: none;
-  }
-  .puck-name {
-    font-size: var(--text-caption);
-    font-weight: var(--weight-bold);
-    color: var(--color-text-primary);
-    text-align: center;
-    line-height: 1.2;
-  }
+    .puck-tile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        background: none;
+        padding: 0;
+        font-family: var(--font-body);
+        text-decoration: none;
+    }
+    .puck-name {
+        font-size: var(--text-caption);
+        font-weight: var(--weight-bold);
+        color: var(--color-text-primary);
+        text-align: center;
+        line-height: 1.2;
+    }
 </style>

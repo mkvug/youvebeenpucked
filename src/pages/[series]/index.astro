@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import Container from "../../components/Container.astro";
 import seriesData from "../../data/series.json";
 import pucksData from "../../data/pucks.json";
 import type { Puck, Series } from "../../lib/types";
@@ -23,16 +24,18 @@ const { series, pucks } = Astro.props;
 ---
 
 <Base title={series.name}>
-  <p><a href="/">&larr; All series</a></p>
-  <h1>{series.name}</h1>
-  {series.notes && <p>{series.notes}</p>}
-  <ul>
-    {
-      pucks.map((puck) => (
-        <li>
-          <a href={`/${series.slug}/${puck.slug}/`}>{puck.name}</a>
-        </li>
-      ))
-    }
-  </ul>
+  <Container>
+    <p><a href="/">&larr; All series</a></p>
+    <h1>{series.name}</h1>
+    {series.notes && <p>{series.notes}</p>}
+    <ul>
+      {
+        pucks.map((puck) => (
+          <li>
+            <a href={`/${series.slug}/${puck.slug}/`}>{puck.name}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
 </Base>

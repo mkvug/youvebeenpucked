@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import Container from "../../components/Container.astro";
 import seriesData from "../../data/series.json";
 import pucksData from "../../data/pucks.json";
 import type { Puck, Series } from "../../lib/types";
@@ -23,20 +24,22 @@ const { puck, series } = Astro.props;
 ---
 
 <Base title={`${puck.name} — ${series?.name ?? puck.seriesSlug}`}>
-  <p><a href={`/${puck.seriesSlug}/`}>&larr; {series?.name ?? puck.seriesSlug}</a></p>
-  <h1>{puck.name}</h1>
-  {puck.imageUrl && <img src={puck.imageUrl} alt={puck.name} />}
-  <dl>
-    <dt>Status</dt>
-    <dd>{puck.status}</dd>
-    {
-      puck.seriesNumber != null && (
-        <>
-          <dt>Number in series</dt>
-          <dd>{puck.seriesNumber}</dd>
-        </>
-      )
-    }
-  </dl>
-  {puck.notes && <p>{puck.notes}</p>}
+  <Container>
+    <p><a href={`/${puck.seriesSlug}/`}>&larr; {series?.name ?? puck.seriesSlug}</a></p>
+    <h1>{puck.name}</h1>
+    {puck.imageUrl && <img src={puck.imageUrl} alt={puck.name} />}
+    <dl>
+      <dt>Status</dt>
+      <dd>{puck.status}</dd>
+      {
+        puck.seriesNumber != null && (
+          <>
+            <dt>Number in series</dt>
+            <dd>{puck.seriesNumber}</dd>
+          </>
+        )
+      }
+    </dl>
+    {puck.notes && <p>{puck.notes}</p>}
+  </Container>
 </Base>

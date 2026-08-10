@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import Badge from "../components/Badge.astro";
 import Button from "../components/Button.astro";
+import Container from "../components/Container.astro";
 import PuckGrid from "../components/PuckGrid.astro";
 import seriesData from "../data/series.json";
 import pucksData from "../data/pucks.json";
@@ -15,18 +16,21 @@ const TONES: Tone[] = ["teal", "coral", "mustard", "plum"];
 const toneFor = (index: number) => TONES[index % TONES.length];
 
 function pucksFor(slug: string) {
-  return pucks.filter((p) => p.seriesSlug === slug);
+    return pucks.filter((p) => p.seriesSlug === slug);
 }
 
 /** Approximates a series' "hidden on" date from its earliest puck's Created field, since
  * Series records don't carry a date of their own. */
 function seriesDateLabel(seriesPucks: Puck[]) {
-  const dates = seriesPucks
-    .map((p) => (p.created ? new Date(p.created.split(" ")[0]) : null))
-    .filter((d): d is Date => d != null && !Number.isNaN(d.getTime()));
-  if (dates.length === 0) return null;
-  const earliest = new Date(Math.min(...dates.map((d) => d.getTime())));
-  return new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(earliest);
+    const dates = seriesPucks
+        .map((p) => (p.created ? new Date(p.created.split(" ")[0]) : null))
+        .filter((d): d is Date => d != null && !Number.isNaN(d.getTime()));
+    if (dates.length === 0) return null;
+    const earliest = new Date(Math.min(...dates.map((d) => d.getTime())));
+    return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        year: "numeric",
+    }).format(earliest);
 }
 
 const latest = series[0];
@@ -36,151 +40,141 @@ const previousSeries = series.slice(1);
 ---
 
 <Base title="You've Been Pucked">
-  <header class="site-header">
-    <div class="brand">You've Been Pucked</div>
-  </header>
+    {
+        latest && (
+            <section class="hero">
+                <Container as="div" class="hero-inner">
+                    <div class="hero-tag">
+                        <Badge status="hidden">Latest series</Badge>
+                        {latestDate && (
+                            <span class="hero-date">{latestDate}</span>
+                        )}
+                    </div>
+                    <h1>{latest.name}</h1>
+                    {latest.notes && <p class="hero-tagline">{latest.notes}</p>}
+                </Container>
+            </section>
+        )
+    }
 
-  {
-    latest && (
-      <section class="hero">
-        <div class="hero-tag">
-          <Badge status="hidden">Latest series</Badge>
-          {latestDate && <span class="hero-date">{latestDate}</span>}
-        </div>
-        <h1>{latest.name}</h1>
-        {latest.notes && <p class="hero-tagline">{latest.notes}</p>}
-      </section>
-    )
-  }
+    {
+        latest && latestPucks.length > 0 && (
+            <section class="grid-section">
+                <Container>
+                    <PuckGrid
+                        pucks={latestPucks}
+                        seriesSlug={latest.slug}
+                        tone={toneFor(0)}
+                    />
+                </Container>
+            </section>
+        )
+    }
 
-  {
-    latest && latestPucks.length > 0 && (
-      <section class="grid-section">
-        <PuckGrid pucks={latestPucks} seriesSlug={latest.slug} tone={toneFor(0)} />
-      </section>
-    )
-  }
-
-  {
-    previousSeries.length > 0 && (
-      <section class="previous-section">
-        <h2>Previous series</h2>
-        <div class="previous-grid">
-          {previousSeries.map((s, i) => {
-            const count = pucksFor(s.slug).length;
-            return (
-              <a class="series-card" href={`/${s.slug}/`}>
-                <div class="series-name">{s.name}</div>
-                <div class="series-meta">
-                  {count} {count === 1 ? "puck" : "pucks"}
-                </div>
-                <Button variant="outline" size="sm" as="span">
-                  View series
-                </Button>
-              </a>
-            );
-          })}
-        </div>
-      </section>
-    )
-  }
-
-  <footer class="site-footer">© {new Date().getFullYear()} You've Been Pucked</footer>
+    {
+        previousSeries.length > 0 && (
+            <section class="previous-section">
+                <Container>
+                    <h2>Previous series</h2>
+                    <div class="previous-grid">
+                        {previousSeries.map((s, i) => {
+                            const count = pucksFor(s.slug).length;
+                            return (
+                                <a class="series-card" href={`/${s.slug}/`}>
+                                    <div class="series-name">{s.name}</div>
+                                    <div class="series-meta">
+                                        {count} {count === 1 ? "puck" : "pucks"}
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        as="span"
+                                    >
+                                        View series
+                                    </Button>
+                                </a>
+                            );
+                        })}
+                    </div>
+                </Container>
+            </section>
+        )
+    }
 </Base>
 
 <style>
-  .site-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 48px;
-    border-bottom: 1px solid var(--color-border-default);
-  }
-  .brand {
-    font-family: var(--font-display);
-    font-weight: var(--weight-bold);
-    font-size: var(--text-body-lg);
-    color: var(--color-text-primary);
-  }
+    .hero {
+        background: var(--color-accent-coral);
+    }
+    .hero :global(.hero-inner) {
+        padding-block: 72px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .hero-tag {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+    .hero-date {
+        color: var(--white);
+        font-size: var(--text-body-sm);
+        font-weight: var(--weight-bold);
+    }
+    .hero h1 {
+        font-size: var(--text-display-lg);
+        color: var(--white);
+        margin-bottom: 16px;
+    }
+    .hero-tagline {
+        font-size: var(--text-body-lg);
+        color: var(--white);
+        line-height: 1.5;
+        margin: 0;
+        max-width: 460px;
+    }
 
-  .hero {
-    padding: 72px 48px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    background: var(--color-accent-coral);
-  }
-  .hero-tag {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  .hero-date {
-    color: var(--white);
-    font-size: var(--text-body-sm);
-    font-weight: var(--weight-bold);
-  }
-  .hero h1 {
-    font-size: var(--text-display-lg);
-    color: var(--white);
-    margin-bottom: 16px;
-  }
-  .hero-tagline {
-    font-size: var(--text-body-lg);
-    color: var(--white);
-    line-height: 1.5;
-    margin: 0;
-    max-width: 460px;
-  }
+    .grid-section {
+        padding-block: 56px;
+    }
 
-  .grid-section {
-    padding: 56px 48px;
-  }
-
-  .previous-section {
-    padding: 0 48px 64px;
-    border-top: 1px solid var(--color-border-default);
-    padding-top: 40px;
-    background: var(--color-bg-surface-sunken);
-  }
-  .previous-section h2 {
-    font-size: var(--text-display-sm);
-    color: var(--color-text-primary);
-    margin-bottom: 24px;
-  }
-  .previous-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-  }
-  .series-card {
-    display: block;
-    background: var(--color-bg-surface);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    padding: 20px;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .series-name {
-    font-family: var(--font-display);
-    font-weight: var(--weight-semibold);
-    font-size: var(--text-display-sm);
-    color: var(--color-text-primary);
-    margin-bottom: 6px;
-  }
-  .series-meta {
-    color: var(--color-text-muted);
-    font-size: var(--text-body-sm);
-    margin-bottom: 14px;
-  }
-
-  .site-footer {
-    padding: 28px 48px;
-    border-top: 1px solid var(--color-border-default);
-    color: var(--color-text-muted);
-    font-size: var(--text-body-sm);
-  }
+    .previous-section {
+        padding-block: 40px 64px;
+        border-top: 1px solid var(--color-border-default);
+        background: var(--color-bg-surface-sunken);
+    }
+    .previous-section h2 {
+        font-size: var(--text-display-sm);
+        color: var(--color-text-primary);
+        margin-bottom: 24px;
+    }
+    .previous-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    .series-card {
+        display: block;
+        background: var(--color-bg-surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: 20px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .series-name {
+        font-family: var(--font-display);
+        font-weight: var(--weight-semibold);
+        font-size: var(--text-display-sm);
+        color: var(--color-text-primary);
+        margin-bottom: 6px;
+    }
+    .series-meta {
+        color: var(--color-text-muted);
+        font-size: var(--text-body-sm);
+        margin-bottom: 14px;
+    }
 </style>

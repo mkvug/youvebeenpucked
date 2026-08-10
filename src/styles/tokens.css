@@ -108,6 +108,7 @@
   --space-10: 72px;
   --container-mobile: 100%;
   --container-max: 480px;
+  --content-max-width: 1200px;
   --page-gutter: 20px;
 
   /* radius */
