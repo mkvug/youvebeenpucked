@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import "dotenv/config";
 import { fetchAllRecords } from "../src/lib/airtable.ts";
 import { resolveImageUrl } from "../src/lib/images.ts";
 import { legacySlug, parseSlugsFromUrl } from "../src/lib/slugs.ts";

@@ -1,0 +1,61 @@
+---
+type Status = "found" | "keep" | "rehide" | "hidden";
+
+interface Props {
+  status?: Status;
+}
+
+const LABELS: Record<Status, string> = {
+  found: "Found",
+  keep: "Kept",
+  rehide: "Re-hidden",
+  hidden: "Still out there",
+};
+
+const { status = "hidden" } = Astro.props;
+const label = LABELS[status] ?? LABELS.hidden;
+---
+
+<span class:list={["ds-badge", `status-${status}`]}>
+  <span class="dot"></span><slot>{label}</slot>
+</span>
+
+<style>
+  .ds-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    white-space: nowrap;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  .status-found {
+    background: var(--color-status-found-soft);
+    color: var(--color-status-found);
+  }
+  .status-keep {
+    background: var(--color-status-keep-soft);
+    color: var(--color-status-keep);
+  }
+  .status-rehide {
+    background: var(--color-status-rehide-soft);
+    color: var(--color-status-rehide);
+  }
+  .status-hidden {
+    background: var(--color-status-hidden-soft);
+    color: var(--color-status-hidden);
+  }
+</style>

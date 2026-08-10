@@ -6,7 +6,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "npm run fetch:data && astro dev",
+    "dev": "astro dev",
     "build": "npm run fetch:data && astro build",
     "preview": "astro preview",
     "fetch:data": "tsx scripts/fetch-data.ts",
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
+    "dotenv": "^17.4.2",
     "tsx": "^4.23.12"
   }
 }

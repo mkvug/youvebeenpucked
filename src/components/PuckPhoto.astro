@@ -1,0 +1,54 @@
+---
+type Tone = "teal" | "coral" | "mustard" | "plum";
+
+interface Props {
+  imageUrl?: string | null;
+  tone?: Tone;
+  size?: number;
+  alt?: string;
+}
+
+const { imageUrl = null, tone = "teal", size = 72, alt = "Puck photo" } = Astro.props;
+---
+
+<div class:list={["ds-puck-photo", `tone-${tone}`]} style={`width:${size}px;height:${size}px`}>
+  {imageUrl && <img src={imageUrl} alt={alt} />}
+  <div class="ring"></div>
+</div>
+
+<style>
+  .ds-puck-photo {
+    border-radius: 50%;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-puck);
+    background: var(--color-bg-surface-sunken);
+  }
+  .ds-puck-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .ds-puck-photo .ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: var(--shadow-puck);
+    pointer-events: none;
+  }
+
+  .ds-puck-photo:not(:has(img)).tone-teal {
+    background: radial-gradient(circle at 35% 30%, var(--teal-300), var(--teal-500) 60%, var(--teal-900));
+  }
+  .ds-puck-photo:not(:has(img)).tone-coral {
+    background: radial-gradient(circle at 35% 30%, var(--coral-400), var(--coral-500) 60%, var(--coral-700));
+  }
+  .ds-puck-photo:not(:has(img)).tone-mustard {
+    background: radial-gradient(circle at 35% 30%, var(--mustard-300), var(--mustard-500) 60%, var(--mustard-600));
+  }
+  .ds-puck-photo:not(:has(img)).tone-plum {
+    background: radial-gradient(circle at 35% 30%, #d9b8ef, var(--plum-500) 60%, var(--plum-600));
+  }
+</style>

@@ -1,0 +1,73 @@
+---
+interface Props {
+  variant?: "primary" | "coral" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
+  href?: string;
+  /** Render as an inert <span> — for a button-styled label nested inside an
+   * already-interactive ancestor (e.g. a card that's itself an <a>), where a
+   * real <button>/<a> would be invalid nested interactive content. */
+  as?: "span";
+  class?: string;
+}
+
+const { variant = "primary", size = "md", href, as, class: className } = Astro.props;
+const Tag = as === "span" ? "span" : href ? "a" : "button";
+---
+
+<Tag class:list={["ds-button", `variant-${variant}`, `size-${size}`, className]} href={href}>
+  <slot />
+</Tag>
+
+<style>
+  .ds-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+      transform 0.12s ease,
+      background 0.15s ease;
+  }
+  .ds-button:active {
+    transform: scale(0.96);
+  }
+
+  .variant-primary {
+    background: var(--color-brand-primary);
+    color: var(--color-text-on-brand);
+    border: none;
+  }
+  .variant-coral {
+    background: var(--color-accent-coral);
+    color: var(--color-text-on-brand);
+    border: none;
+  }
+  .variant-outline {
+    background: transparent;
+    color: var(--color-brand-primary-hover);
+    border: 2px solid var(--color-brand-primary);
+  }
+  .variant-ghost {
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: none;
+  }
+
+  .size-sm {
+    padding: 8px 18px;
+    font-size: var(--text-body-sm);
+  }
+  .size-md {
+    padding: 12px 24px;
+    font-size: var(--text-body);
+  }
+  .size-lg {
+    padding: 16px 30px;
+    font-size: var(--text-body-lg);
+  }
+</style>
