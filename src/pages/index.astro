@@ -139,6 +139,7 @@ const previousSeries = series.slice(1);
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 20px;
+        margin-top: 56px;
     }
     .series-card {
         display: block;
@@ -162,3 +163,50 @@ const previousSeries = series.slice(1);
         margin-bottom: 14px;
     }
 </style>
+
+<script>
+    import gsap from "gsap";
+    import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const cards = document.querySelectorAll<HTMLElement>(".series-card");
+    const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (cards.length && !reduceMotion) {
+        // Entrance pop uses scale/opacity so it doesn't fight the continuous
+        // y-based scroll-lag drag set up below.
+        gsap.set(cards, { opacity: 0, scale: 0.85 });
+
+        ScrollTrigger.batch(".series-card", {
+            start: "top 90%",
+            once: true,
+            onEnter: (batch) =>
+                gsap.to(batch, {
+                    opacity: 1,
+                    scale: 1,
+                    duration: 0.7,
+                    ease: "back.out(1.7)",
+                    stagger: 0.08,
+                    overwrite: true,
+                }),
+        });
+
+        // Cards lag behind the scroll and catch up with a springy delay,
+        // as if being dragged along the page.
+        cards.forEach((card) => {
+            gsap.to(card, {
+                y: -50,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: 0.5,
+                },
+            });
+        });
+    }
+</script>

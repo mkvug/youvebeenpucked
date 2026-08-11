@@ -80,3 +80,31 @@ function badgeStatus(status: string): BadgeStatus {
         line-height: 1.2;
     }
 </style>
+
+<script>
+    import gsap from "gsap";
+    import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const tiles = document.querySelectorAll<HTMLElement>(".ds-puck-grid .puck-tile");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (tiles.length && !reduceMotion) {
+        gsap.set(tiles, { opacity: 0, y: 24 });
+
+        ScrollTrigger.batch(".ds-puck-grid .puck-tile", {
+            start: "top 90%",
+            once: true,
+            onEnter: (batch) =>
+                gsap.to(batch, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.5,
+                    ease: "power2.out",
+                    stagger: 0.08,
+                    overwrite: true,
+                }),
+        });
+    }
+</script>
