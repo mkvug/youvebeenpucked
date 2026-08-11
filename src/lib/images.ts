@@ -22,3 +22,11 @@ export function resolveImageUrl(
   }
   return null;
 }
+
+/**
+ * The image host now serves a .webp copy alongside every original at the same path
+ * with the extension swapped, so this derives that URL for use as a <picture> source.
+ */
+export function toWebpUrl(imageUrl: string): string {
+  return imageUrl.replace(/\.[^./?#]+(?=($|\?|#))/, ".webp");
+}

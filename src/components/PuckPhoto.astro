@@ -1,4 +1,6 @@
 ---
+import { toWebpUrl } from "../lib/images";
+
 type Tone = "teal" | "coral" | "mustard" | "plum";
 
 interface Props {
@@ -12,7 +14,12 @@ const { imageUrl = null, tone = "teal", size = 72, alt = "Puck photo" } = Astro.
 ---
 
 <div class:list={["ds-puck-photo", `tone-${tone}`]} style={`width:${size}px;height:${size}px`}>
-  {imageUrl && <img src={imageUrl} alt={alt} />}
+  {imageUrl && (
+    <picture>
+      <source srcset={toWebpUrl(imageUrl)} type="image/webp" />
+      <img src={imageUrl} alt={alt} />
+    </picture>
+  )}
   <div class="ring"></div>
 </div>
 
@@ -24,6 +31,9 @@ const { imageUrl = null, tone = "teal", size = 72, alt = "Puck photo" } = Astro.
     position: relative;
     box-shadow: var(--shadow-puck);
     background: var(--color-bg-surface-sunken);
+  }
+  .ds-puck-photo picture {
+    display: contents;
   }
   .ds-puck-photo img {
     width: 100%;
