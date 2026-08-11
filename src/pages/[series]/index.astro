@@ -174,20 +174,94 @@ const FILTERS = [
 </style>
 
 <script>
-  const tags = document.querySelectorAll(".filter-tags [data-filter]");
-  const tiles = document.querySelectorAll(".puck-tile");
+  import gsap from "gsap";
+  import { Flip } from "gsap/Flip";
+
+  gsap.registerPlugin(Flip);
+
+  const tags = document.querySelectorAll<HTMLElement>(".filter-tags [data-filter]");
+  const tiles = document.querySelectorAll<HTMLElement>(".puck-tile");
+  const gridWrapper = document.querySelector<HTMLElement>(".ds-puck-grid");
   const countEl = document.querySelector("#puck-count");
   const emptyEl = document.querySelector("#empty-state");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let clearMinHeight: gsap.core.Tween | null = null;
 
-  function applyFilter(filter) {
+  function applyFilter(filter: string) {
     let visible = 0;
+    const leaving: HTMLElement[] = [];
+    const entering: HTMLElement[] = [];
+    const staying: HTMLElement[] = [];
+
     tiles.forEach((tile) => {
       const match = filter === "all" || tile.dataset.status === filter;
-      tile.hidden = !match;
       if (match) visible++;
+      if (match && tile.hidden) entering.push(tile);
+      else if (!match && !tile.hidden) leaving.push(tile);
+      else if (match && !tile.hidden) staying.push(tile);
     });
+
     if (countEl) countEl.textContent = `${visible} ${visible === 1 ? "puck" : "pucks"}`;
     if (emptyEl) emptyEl.hidden = visible !== 0;
+
+    if (reduceMotion) {
+      tiles.forEach((tile) => {
+        tile.hidden = !(filter === "all" || tile.dataset.status === filter);
+      });
+    } else {
+      const flipDuration = 0.4;
+      const flipStagger = 0.03;
+
+      const reflow = () => {
+        const state = Flip.getState([...staying, ...entering]);
+
+        entering.forEach((tile) => {
+          tile.hidden = false;
+        });
+
+        if (gridWrapper) {
+          gridWrapper.style.minHeight = `${gridWrapper.getBoundingClientRect().height}px`;
+        }
+
+        Flip.from(state, {
+          duration: flipDuration,
+          ease: "power2.out",
+          stagger: flipStagger,
+          absolute: true,
+          onEnter: (elements) =>
+            gsap.fromTo(
+              elements,
+              { opacity: 0, scale: 0.9 },
+              { opacity: 1, scale: 1, duration: flipDuration, ease: "power2.out" },
+            ),
+        });
+
+        clearMinHeight?.kill();
+        clearMinHeight = gsap.delayedCall(flipDuration + flipStagger * entering.length + 0.1, () => {
+          if (gridWrapper) gridWrapper.style.minHeight = "";
+        });
+      };
+
+      if (leaving.length) {
+        gsap.to(leaving, {
+          opacity: 0,
+          scale: 0.9,
+          duration: 0.2,
+          ease: "power1.in",
+          stagger: 0.02,
+          onComplete: () => {
+            leaving.forEach((tile) => {
+              tile.hidden = true;
+              gsap.set(tile, { clearProps: "opacity,scale" });
+            });
+            reflow();
+          },
+        });
+      } else {
+        reflow();
+      }
+    }
+
     tags.forEach((tag) => {
       tag.setAttribute("aria-pressed", String(tag.dataset.filter === filter));
     });
