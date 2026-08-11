@@ -1,10 +1,10 @@
 ---
 import Badge from "./Badge.astro";
 import PuckPhoto from "./PuckPhoto.astro";
+import { badgeStatus } from "../lib/status";
 import type { Puck } from "../lib/types";
 
 type Tone = "teal" | "coral" | "mustard" | "plum";
-type BadgeStatus = "found" | "keep" | "rehide" | "hidden";
 
 interface Props {
     pucks: Puck[];
@@ -13,11 +13,6 @@ interface Props {
 }
 
 const { pucks, seriesSlug, tone } = Astro.props;
-
-function badgeStatus(status: string): BadgeStatus {
-    if (status === "Found" || status === "Assumed Found") return "found";
-    return "hidden";
-}
 ---
 
 <div class="ds-puck-grid">
