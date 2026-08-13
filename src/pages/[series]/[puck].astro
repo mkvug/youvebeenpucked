@@ -3,6 +3,7 @@ import Base from "../../layouts/Base.astro";
 import Container from "../../components/Container.astro";
 import Badge from "../../components/Badge.astro";
 import Button from "../../components/Button.astro";
+import Dialog from "../../components/Dialog.astro";
 import PuckPhoto from "../../components/PuckPhoto.astro";
 import seriesData from "../../data/series.json";
 import pucksData from "../../data/pucks.json";
@@ -95,7 +96,7 @@ const STORY: Record<typeof status, string> = {
             <div class="cta-row fade" style="animation-delay:.25s">
                 {
                     status === "hidden" && (
-                        <Button variant="coral" size="lg">
+                        <Button variant="coral" size="lg" class="js-found-trigger">
                             I found this puck!
                         </Button>
                     )
@@ -112,9 +113,98 @@ const STORY: Record<typeof status, string> = {
                     )
                 }
             </div>
+
+            {
+                status === "hidden" && (
+                    <Dialog id="found-dialog">
+                        <Fragment slot="title">Nice find!</Fragment>
+                        <p>
+                            Would you like to keep this one, or hide it again
+                            for the next person to find?
+                        </p>
+                        <Fragment slot="actions">
+                            <Button
+                                variant="coral"
+                                size="md"
+                                class="js-keep-btn"
+                            >
+                                Keep it
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="md"
+                                class="js-rehide-btn"
+                            >
+                                Re-hide it
+                            </Button>
+                        </Fragment>
+                    </Dialog>
+                )
+            }
         </div>
     </Container>
 </Base>
+
+<script
+    define:vars={{
+        puckId: puck.id,
+        keepWebhookUrl: import.meta.env.PUBLIC_AIRTABLE_KEEP_WEBHOOK_URL ?? "",
+        rehideWebhookUrl:
+            import.meta.env.PUBLIC_AIRTABLE_REHIDE_WEBHOOK_URL ?? "",
+    }}
+>
+    const trigger = document.querySelector(".js-found-trigger");
+    const dialog = document.querySelector("#found-dialog");
+    const keepBtn = document.querySelector(".js-keep-btn");
+    const rehideBtn = document.querySelector(".js-rehide-btn");
+    const storageKey = `pucked:acted:${puckId}`;
+
+    function markActed() {
+        if (!trigger) return;
+        trigger.disabled = true;
+        trigger.textContent = "Thanks for the update!";
+    }
+
+    if (localStorage.getItem(storageKey)) markActed();
+
+    trigger?.addEventListener("click", () => dialog?.showModal());
+
+    // Separate webhooks per action — each Airtable Automation hardcodes its
+    // own target Status, so the only input needed is which record to update.
+    // This trigger type (Airtable Workflows' generic webhook) only ever reads
+    // the request body — it doesn't expose URL query params as bindable
+    // fields — so puckId has to travel as genuine url-encoded form data, not
+    // JSON text, so Airtable can auto-parse it into a bindable field without
+    // a script step.
+    function submitAction(webhookUrl, label) {
+        if (!webhookUrl) {
+            console.warn(`${label} webhook URL is not set — skipping Airtable update.`);
+            return;
+        }
+        // mode: "no-cors" is required since the endpoint doesn't support a
+        // CORS preflight, which restricts Content-Type to a CORS-safelisted
+        // value — Airtable accepts "application/x-www-form-urlencoded"
+        // (rejects "text/plain"). Fire-and-forget: the response is opaque and
+        // can't be read, so the UI update below is optimistic, not confirmed.
+        fetch(webhookUrl, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `puckId=${encodeURIComponent(puckId)}`,
+        }).catch(() => {});
+    }
+
+    keepBtn?.addEventListener("click", () => {
+        submitAction(keepWebhookUrl, "Keep");
+        localStorage.setItem(storageKey, "Found");
+        markActed();
+    });
+    rehideBtn?.addEventListener("click", () => {
+        submitAction(rehideWebhookUrl, "Re-hide");
+        localStorage.setItem(storageKey, "Hidden");
+        markActed();
+    });
+</script>
 
 <style>
     .puck-page {

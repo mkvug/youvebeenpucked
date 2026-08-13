@@ -33,6 +33,8 @@ jobs:
         env:
           AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
           AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          PUBLIC_AIRTABLE_KEEP_WEBHOOK_URL: ${{ secrets.PUBLIC_AIRTABLE_KEEP_WEBHOOK_URL }}
+          PUBLIC_AIRTABLE_REHIDE_WEBHOOK_URL: ${{ secrets.PUBLIC_AIRTABLE_REHIDE_WEBHOOK_URL }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -1,0 +1,117 @@
+---
+interface Props {
+  id: string;
+  class?: string;
+}
+
+const { id, class: className } = Astro.props;
+---
+
+<dialog id={id} class:list={["ds-dialog", className]}>
+  <form method="dialog" class="ds-dialog-form">
+    <div class="ds-dialog-header">
+      <h2 class="ds-dialog-title"><slot name="title" /></h2>
+      <button type="submit" class="ds-dialog-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="ds-dialog-body">
+      <slot />
+    </div>
+    <div class="ds-dialog-actions">
+      <slot name="actions" />
+    </div>
+  </form>
+</dialog>
+
+<style>
+  .ds-dialog {
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: 0;
+    width: calc(100% - 40px);
+    max-width: 380px;
+    background: var(--color-bg-surface);
+    box-shadow: var(--shadow-lg);
+    color: var(--color-text-primary);
+  }
+  .ds-dialog::backdrop {
+    background: var(--ink-900);
+    opacity: 0.5;
+  }
+  .ds-dialog[open] {
+    animation: ds-dialog-in 0.2s ease-out;
+  }
+
+  .ds-dialog-form {
+    padding: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .ds-dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+  .ds-dialog-title {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-title);
+    margin: 0;
+  }
+  .ds-dialog-close {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 0;
+    margin: -4px -4px 0 0;
+  }
+  .ds-dialog-close:hover {
+    color: var(--color-text-secondary);
+  }
+
+  .ds-dialog-body {
+    font-size: var(--text-body);
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
+  }
+
+  .ds-dialog-actions {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+  .ds-dialog-actions > :global(.ds-button) {
+    flex: 1;
+  }
+
+  @keyframes ds-dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ds-dialog[open] {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Dismiss any ds-dialog when its backdrop is clicked — a click that lands on
+  // the <dialog> element itself (rather than a descendant) is a backdrop click.
+  document.addEventListener("click", (event) => {
+    if (event.target instanceof HTMLDialogElement && event.target.classList.contains("ds-dialog")) {
+      event.target.close();
+    }
+  });
+</script>
