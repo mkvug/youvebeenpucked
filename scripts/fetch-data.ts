@@ -4,6 +4,7 @@ import "dotenv/config";
 import { fetchAllRecords } from "../src/lib/airtable.ts";
 import { resolveImageUrl } from "../src/lib/images.ts";
 import { legacySlug, parseSlugsFromUrl } from "../src/lib/slugs.ts";
+import { sortPucksByCreated, sortSeriesByRecency } from "../src/lib/sortPucks.ts";
 import type { Puck, PuckFields, Series, SeriesFields } from "../src/lib/types.ts";
 
 // Only these Puck statuses get a published page. Everything else (e.g. "In Production",
@@ -41,7 +42,7 @@ async function main() {
 
   const flaggedPucks: string[] = [];
 
-  const pucks: Puck[] = puckRecords
+  const unsortedPucks: Puck[] = puckRecords
     .filter((record) => record.fields.Status && PUBLISHED_STATUSES.has(record.fields.Status))
     .map((record) => {
       const fields = record.fields;
@@ -74,9 +75,12 @@ async function main() {
       };
     });
 
+  // Pucks in the order they were hidden; series newest-first by their latest puck.
+  const pucks = sortPucksByCreated(unsortedPucks);
+
   const publishedSeriesSlugs = new Set(pucks.map((puck) => puck.seriesSlug));
 
-  const series: Series[] = seriesRecords
+  const unsortedSeries: Series[] = seriesRecords
     .filter((record) => publishedSeriesSlugs.has(seriesSlugById.get(record.id)!))
     .map((record) => ({
       id: record.id,
@@ -89,6 +93,8 @@ async function main() {
       // see src/lib/images.ts TODO for attachment-downloading if series images are needed.
       imageUrl: null,
     }));
+
+  const series = sortSeriesByRecency(unsortedSeries, pucks);
 
   if (flaggedSeries.length > 0) {
     console.warn(
